@@ -1,0 +1,11 @@
+services:
+  db:
+    image: mongo:5
+    container_name: cima-rs-mongo
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGODB_DATABASE: cima-rs-db
+    volumes:
+      - ./mongo:/data/db

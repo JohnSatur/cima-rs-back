@@ -1,6 +1,7 @@
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Property, PropertySchema } from './property.schema';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Property } from './property.schema';
 
+@Schema()
 export class Construction extends Property {
   @Prop({ type: Number, min: 0 })
   rooms: number;
@@ -44,4 +45,3 @@ export class Construction extends Property {
 }
 
 export const ConstructionSchema = SchemaFactory.createForClass(Construction);
-PropertySchema.discriminator('Construction', ConstructionSchema);

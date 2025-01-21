@@ -22,8 +22,19 @@ export class PropertiesService {
     }
   }
 
-  findAll() {
-    return `This action returns all properties`;
+  async findAll(filters: any): Promise<Property[]> {
+    const query: any = {};
+
+    if (filters.propertyType) query.propertyType = filters.propertyType;
+    if (filters.dealType) query.dealType = filters.dealType;
+    if (filters.minPrice) query.price = { $gte: filters.minPrice };
+    if (filters.maxPrice)
+      query.price = { ...query.price, $lte: filters.maxPrice };
+    if (filters.city) query['address.city'] = filters.city;
+    if (filters.state) query['address.state'] = filters.state;
+    if (filters.country) query['address.country'] = filters.country;
+
+    return this.propertyModel.find(query).exec();
   }
 
   findOne(id: number) {

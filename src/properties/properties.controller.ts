@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 
 import { PropertiesService } from './properties.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
+import { GetPropertiesQueryDto } from './dto/get-property-query.dto';
 
 @Controller('properties')
 export class PropertiesController {
@@ -22,8 +24,8 @@ export class PropertiesController {
   }
 
   @Get()
-  findAll() {
-    return this.propertiesService.findAll();
+  async findAll(@Query() query: GetPropertiesQueryDto) {
+    return this.propertiesService.findAll(query);
   }
 
   @Get(':id')

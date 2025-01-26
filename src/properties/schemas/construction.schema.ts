@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Property } from './property.schema';
+// import { Property } from './property.schema';
 
 @Schema()
 export class Construction extends Property {

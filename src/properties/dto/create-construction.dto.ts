@@ -7,8 +7,9 @@ import {
   IsString,
   Min,
 } from 'class-validator';
+import { CreatePropertyDto } from './create-property.dto';
 
-export class CreateConstructionDto {
+export class CreateConstructionDto extends CreatePropertyDto {
   @IsNumber()
   @IsOptional()
   @Min(0)

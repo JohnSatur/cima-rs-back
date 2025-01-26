@@ -32,20 +32,20 @@ export class CreatePropertyDto {
   @Type(() => Number)
   price: number;
 
-  @IsOptional()
-  @IsString()
-  @IsEnum([
-    'house',
-    'apartment',
-    'land',
-    'loft',
-    'retail',
-    'building',
-    'office',
-    'other',
-  ])
-  @Type(() => String)
-  propertyType?: string;
+  // @IsOptional()
+  // @IsString()
+  // @IsEnum([
+  //   'house',
+  //   'apartment',
+  //   'land',
+  //   'loft',
+  //   'retail',
+  //   'building',
+  //   'office',
+  //   'other',
+  // ])
+  // @Type(() => String)
+  // propertyType?: string;
 
   @IsNumber()
   @IsNotEmpty()

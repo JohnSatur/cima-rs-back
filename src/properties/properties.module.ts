@@ -3,20 +3,22 @@ import { PropertiesService } from './properties.service';
 import { PropertiesController } from './properties.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Property, PropertySchema } from './schemas/property.schema';
-import { ConstructionSchema } from './schemas/construction.schema';
-import { LandSchema } from './schemas/land.schema';
+import { Land, LandSchema } from './schemas/land.schema';
+import {
+  Construction,
+  ConstructionSchema,
+} from './schemas/construction.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeatureAsync([
+    MongooseModule.forFeature([
       {
         name: Property.name,
-        useFactory: () => {
-          const schema = PropertySchema;
-          schema.discriminator('construction', ConstructionSchema);
-          schema.discriminator('land', LandSchema);
-          return schema;
-        },
+        schema: PropertySchema,
+        discriminators: [
+          { name: Land.name, schema: LandSchema },
+          { name: Construction.name, schema: ConstructionSchema },
+        ],
       },
     ]),
   ],

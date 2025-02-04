@@ -1,10 +1,11 @@
 import { IsEnum, IsNumber, IsString, Max, Min } from 'class-validator';
 import { CreatePropertyDto } from './create-property.dto';
 import { Type } from 'class-transformer';
+import { LandType, LandUse, Topography } from '../enums/land.enum';
 
 export class CreateLandDto extends CreatePropertyDto {
   @IsString()
-  @IsEnum(['Residential', 'Commercial', 'Agricultural', 'Mixed'])
+  @IsEnum(LandUse)
   @Type(() => String)
   landUse: string;
 
@@ -14,12 +15,12 @@ export class CreateLandDto extends CreatePropertyDto {
   landOccupationCoefficient: number;
 
   @IsString()
-  @IsEnum(['Urban', 'Suburban', 'Rural', 'Industrial'])
+  @IsEnum(LandType)
   @Type(() => String)
   landType: string;
 
   @IsString()
-  @IsEnum(['Flat', 'Inclined', 'Irregular'])
+  @IsEnum(Topography)
   @Type(() => String)
   topography: string;
 }

@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsBoolean,
+  IsEnum,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -8,6 +9,7 @@ import {
   Min,
 } from 'class-validator';
 import { CreatePropertyDto } from './create-property.dto';
+import { ConstructionType } from '../enums/construction.enum';
 
 export class CreateConstructionDto extends CreatePropertyDto {
   @IsNumber()
@@ -53,4 +55,7 @@ export class CreateConstructionDto extends CreatePropertyDto {
   @IsNumber()
   @IsOptional()
   yearOfConstruction?: number;
+
+  @IsEnum(ConstructionType)
+  constructionType: string;
 }

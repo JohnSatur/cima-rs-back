@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-
 import { PropertiesService } from './properties.service';
 import { Construction } from './schemas/construction.schema';
 import { CreateConstructionDto } from './dto/create-construction.dto';

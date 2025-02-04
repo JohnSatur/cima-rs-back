@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Property } from './property.schema';
-// import { Property } from './property.schema';
+import { ConstructionType } from '../enums/construction.enum';
 
 @Schema()
 export class Construction extends Property {
@@ -43,6 +43,9 @@ export class Construction extends Property {
     },
   })
   constructionYear: number;
+
+  @Prop({ type: String, enum: ConstructionType, required: true })
+  constructionType: string;
 }
 
 export const ConstructionSchema = SchemaFactory.createForClass(Construction);

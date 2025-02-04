@@ -1,13 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { DealType } from '../enums/property.enum';
 
-@Schema({ discriminatorKey: 'propertyType' })
+@Schema({ discriminatorKey: 'propertyType', timestamps: true })
 export class Property extends Document {
   @Prop({ type: Object, required: true })
   address: {
     street: string;
-    intNumber: number;
-    extNumber: number;
+    intNumber: string;
+    extNumber: string;
     neighborhood: string;
     zipCode: number;
     city: string;
@@ -29,7 +30,7 @@ export class Property extends Document {
 
   @Prop({
     required: true,
-    enum: ['sale', 'rent'],
+    enum: DealType,
   })
   dealType: string;
 

@@ -15,6 +15,7 @@ import {
 import { AddressDto } from './address.dto';
 import { Type } from 'class-transformer';
 import { LocationDto } from './location.dto';
+import { DealType } from '../enums/property.enum';
 
 export class CreatePropertyDto {
   @IsDefined()
@@ -32,21 +33,6 @@ export class CreatePropertyDto {
   @Type(() => Number)
   price: number;
 
-  // @IsOptional()
-  // @IsString()
-  // @IsEnum([
-  //   'house',
-  //   'apartment',
-  //   'land',
-  //   'loft',
-  //   'retail',
-  //   'building',
-  //   'office',
-  //   'other',
-  // ])
-  // @Type(() => String)
-  // propertyType?: string;
-
   @IsNumber()
   @IsNotEmpty()
   @Min(0)
@@ -54,7 +40,7 @@ export class CreatePropertyDto {
   landArea: number;
 
   @IsString()
-  @IsEnum(['sale', 'rent'])
+  @IsEnum(DealType)
   @Type(() => String)
   dealType: string;
 

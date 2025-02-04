@@ -10,12 +10,12 @@ export class AddressDto {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  intNumber?: number;
+  intNumber?: string;
 
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  extNumber?: number;
+  extNumber?: string;
 
   @IsOptional()
   @Type(() => String)

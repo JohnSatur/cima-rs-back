@@ -8,10 +8,12 @@ import {
   Construction,
   ConstructionSchema,
 } from './schemas/construction.schema';
+import { Counter, CounterSchema } from './schemas/counter.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
+      { name: Counter.name, schema: CounterSchema },
       {
         name: Property.name,
         schema: PropertySchema,

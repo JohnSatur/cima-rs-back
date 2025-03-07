@@ -54,7 +54,7 @@ export class CreateConstructionDto extends CreatePropertyDto {
 
   @IsNumber()
   @IsOptional()
-  yearOfConstruction?: number;
+  constructionYear?: number;
 
   @IsEnum(ConstructionType)
   constructionType: string;

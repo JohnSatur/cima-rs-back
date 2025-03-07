@@ -7,7 +7,7 @@ import { Counter } from './counter.schema';
 
 @Schema({ discriminatorKey: 'propertyType', timestamps: true })
 export class Property extends Document {
-  @Prop({ type: Object, required: true })
+  @Prop({ type: Object, required: false })
   address: {
     street: string;
     intNumber: string;
@@ -26,7 +26,7 @@ export class Property extends Document {
   price: number;
 
   @Prop({
-    required: true,
+    required: false,
     min: 0,
   })
   landArea: number;
@@ -61,6 +61,9 @@ export class Property extends Document {
 
   @Prop({ required: true, default: null, unique: true })
   code: string;
+
+  @Prop({ type: String, required: false })
+  ownerName?: string;
 }
 
 export interface PropertyDocument extends Property {
@@ -107,8 +110,6 @@ PropertySchema.pre<Property>('validate', async function (next) {
 
     // 4. Formatear código final
     this.code = `${prefix}${counter.seq.toString().padStart(3, '0')}`;
-
-    console.log(this.code);
 
     next();
   } catch (error) {

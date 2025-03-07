@@ -66,4 +66,9 @@ export class CreatePropertyDto {
   @IsOptional()
   @Type(() => Number)
   commissionPercentage?: number;
+
+  @IsString()
+  @IsOptional()
+  @Type(() => String)
+  ownerName?: string;
 }

@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { PropertiesService } from './properties.service';
 import { Construction } from './schemas/construction.schema';
@@ -13,10 +14,24 @@ import { CreateConstructionDto } from './dto/create-construction.dto';
 import { CreateLandDto } from './dto/create-land.dto';
 import { Land } from './schemas/land.schema';
 import { UpdateConstructionDto } from './dto/update-construction.dto';
+import { QueryPropertiesDto } from './dto/query-properties.dto';
 
 @Controller('properties')
 export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService) {}
+
+  /* Promise<{
+    data: (Construction | Land)[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }>*/
+  @Get()
+  async getFilteredProperties(
+    @Query() query: QueryPropertiesDto,
+  ): Promise<any> {
+    return this.propertiesService.getFilteredProperties(query);
+  }
 
   @Get('/constructions')
   async getAllConstructions() {

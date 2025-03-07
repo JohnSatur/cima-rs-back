@@ -13,7 +13,7 @@ export class Construction extends Property {
   @Prop({ type: Number, min: 0 })
   builtArea: number;
 
-  @Prop({ type: Number, min: 1 })
+  @Prop({ required: false, type: Number, min: 1 })
   floors: number;
 
   @Prop({ type: [String] })
@@ -32,6 +32,7 @@ export class Construction extends Property {
   private: boolean;
 
   @Prop({
+    required: false,
     type: Number,
     min: 0,
     validate: {

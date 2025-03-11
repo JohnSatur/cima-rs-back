@@ -64,6 +64,9 @@ export class Property extends Document {
 
   @Prop({ type: String, required: false })
   ownerName?: string;
+
+  @Prop({ required: true, default: false })
+  featured: boolean;
 }
 
 export interface PropertyDocument extends Property {

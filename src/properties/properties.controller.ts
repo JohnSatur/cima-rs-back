@@ -14,7 +14,7 @@ import { CreateConstructionDto } from './dto/create-construction.dto';
 import { CreateLandDto } from './dto/create-land.dto';
 import { Land } from './schemas/land.schema';
 import { UpdateConstructionDto } from './dto/update-construction.dto';
-import { QueryPropertiesDto } from './dto/query-properties.dto';
+import { UpdateLandDto } from './dto/update-land.dto';
 
 @Controller('properties')
 export class PropertiesController {
@@ -26,11 +26,29 @@ export class PropertiesController {
     page: number;
     totalPages: number;
   }>*/
+  // @Get()
+  // async getFilteredProperties(
+  //   @Query() query: QueryPropertiesDto,
+  // ): Promise<any> {
+  //   return this.propertiesService.getFilteredProperties(query);
+  // }
+
   @Get()
-  async getFilteredProperties(
-    @Query() query: QueryPropertiesDto,
-  ): Promise<any> {
-    return this.propertiesService.getFilteredProperties(query);
+  async getAllProperties(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 8,
+  ) {
+    return this.propertiesService.getAllProperties(page, limit);
+  }
+
+  @Get('/featured')
+  async getFeaturedProperties() {
+    return this.propertiesService.getFeaturedProperties();
+  }
+
+  @Get(':id')
+  async getPropertyById(@Param('id') id: string) {
+    return this.propertiesService.getPropertyById(id);
   }
 
   @Get('/constructions')
@@ -83,7 +101,7 @@ export class PropertiesController {
   @Patch('/lands/:id')
   async updateLand(
     @Param('id') id: string,
-    @Body() updateLandDto: CreateLandDto,
+    @Body() updateLandDto: UpdateLandDto,
   ): Promise<Land> {
     return this.propertiesService.updateLand(id, updateLandDto);
   }

@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   IsDefined,
   IsEnum,
   IsNotEmpty,
@@ -71,4 +72,9 @@ export class CreatePropertyDto {
   @IsOptional()
   @Type(() => String)
   ownerName?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  @Type(() => Boolean)
+  featured: boolean;
 }

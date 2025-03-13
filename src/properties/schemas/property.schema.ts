@@ -67,6 +67,20 @@ export class Property extends Document {
 
   @Prop({ required: true, default: false })
   featured: boolean;
+
+  @Prop({
+    required: true,
+    default:
+      'https://cimabienesraicesyconstruccion.com/wp-content/uploads/2022/09/CIMA.png',
+  })
+  coverImage: string;
+
+  @Prop({
+    type: [String],
+    required: false,
+    default: [],
+  })
+  images: string[];
 }
 
 export interface PropertyDocument extends Property {

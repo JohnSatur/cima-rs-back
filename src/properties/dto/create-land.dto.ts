@@ -1,7 +1,7 @@
 import { IsEnum, IsNumber, IsString, Max, Min } from 'class-validator';
 import { CreatePropertyDto } from './create-property.dto';
 import { Type } from 'class-transformer';
-import { LandType, LandUse, Topography } from '../enums/land.enum';
+import { LandType, LandUse, Topography } from '../enum/land.enum';
 
 export class CreateLandDto extends CreatePropertyDto {
   @IsString()

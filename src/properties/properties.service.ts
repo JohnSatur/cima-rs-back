@@ -22,31 +22,61 @@ export class PropertiesService {
     @InjectModel(Property.name) private readonly propertyModel: Model<Property>,
   ) {}
 
-  // TODO: Tipar estrictamente
-  async getAllProperties(page: number = 1, limit: number = 8) {
+  async getAllProperties(page: number = 1, limit: number = 8, type?: string) {
     // Calcula el número de documentos a saltar
     const skip = (page - 1) * limit;
 
+    if (page < 1) throw new BadRequestException('La página debe ser mayor a 0');
+
+    if (limit < 1)
+      throw new BadRequestException('El límite debe ser mayor a 0');
+
+    const query: any = {};
+
+    if (type) query.propertyType = type;
+
     const properties = await this.propertyModel
-      .find()
+      .find(query)
       .skip(skip)
       .limit(limit)
       .lean()
       .exec();
 
-    return properties.map((prop) => ({
-      type: (prop as any).propertyType, // Usa el discriminador
-      data: {
-        ...prop,
-        // Elimina campos internos de Mongoose
-        __v: undefined,
-        createdAt: undefined,
-        updatedAt: undefined,
+    const total = await this.propertyModel.countDocuments(query);
+
+    const transformedProperties = properties.map((prop) => {
+      const sanitizedProperty = { ...prop };
+
+      delete sanitizedProperty.address.street;
+      delete sanitizedProperty.address.intNumber;
+      delete sanitizedProperty.address.extNumber;
+      delete sanitizedProperty.commissionPercentage;
+      delete sanitizedProperty.ownerName;
+      delete sanitizedProperty.notes;
+
+      return {
+        type: (sanitizedProperty as any).propertyType,
+        data: {
+          ...sanitizedProperty,
+          // Elimina campos internos de Mongoose
+          __v: undefined,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
+      };
+    });
+
+    return {
+      properties: transformedProperties,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-    }));
+    };
   }
 
-  // TODO: Tipar estrictamente
   async getPropertyById(id: string) {
     if (!Types.ObjectId.isValid(id))
       throw new BadRequestException('El ID proporcionado no es válido');
@@ -63,6 +93,7 @@ export class PropertiesService {
     delete sanitizedProperty.address.extNumber;
     delete sanitizedProperty.commissionPercentage;
     delete sanitizedProperty.ownerName;
+    delete sanitizedProperty.notes;
 
     return {
       type: (sanitizedProperty as any).propertyType, // Usa el discriminador
@@ -74,6 +105,18 @@ export class PropertiesService {
         updatedAt: undefined,
       },
     };
+  }
+
+  async deleteProperty(id: string): Promise<{ message: string }> {
+    if (!Types.ObjectId.isValid(id))
+      throw new BadRequestException('El ID proporcionado no es válido');
+
+    const result = await this.propertyModel.deleteOne({ _id: id });
+
+    if (!result)
+      throw new NotFoundException(`Propiedad con ID ${id} no encontrada`);
+
+    return { message: 'Propiedad eliminada con éxito' };
   }
 
   async getFeaturedProperties() {
@@ -102,17 +145,6 @@ export class PropertiesService {
     return construction.save();
   }
 
-  async getAllConstructions() {
-    return this.constructionModel.find().exec();
-  }
-
-  async getConstructionById(id: string): Promise<Construction> {
-    const construction = this.constructionModel.findById(id).exec();
-    if (!construction)
-      throw new NotFoundException(`Construction with ID ${id} not found`);
-    return construction;
-  }
-
   async updateConstruction(
     id: string,
     updateConstructionDto: UpdateConstructionDto,
@@ -132,25 +164,9 @@ export class PropertiesService {
     return updatedConstruction;
   }
 
-  async deleteConstruction(id: string): Promise<{ message: string }> {
-    const result = await this.constructionModel.findByIdAndDelete(id).exec();
-    if (!result) {
-      throw new NotFoundException(`Construction with ID ${id} not found`);
-    }
-    return { message: `Construction with ID ${id} has been deleted` };
-  }
-
   async createLand(createLandDto: CreateLandDto) {
     const land = new this.landModel(createLandDto);
     return land.save();
-  }
-
-  async getAllLands() {
-    return this.landModel.find().exec();
-  }
-
-  async getLandById(id: string): Promise<Land> {
-    return this.landModel.findById(id).exec();
   }
 
   async updateLand(id: string, updateLandDto: UpdateLandDto): Promise<Land> {
@@ -167,14 +183,6 @@ export class PropertiesService {
       throw new NotFoundException(`Construction with ID ${id} not found`);
 
     return updatedLand;
-  }
-
-  async deleteLand(id: string): Promise<{ message: string }> {
-    const result = await this.landModel.findByIdAndDelete(id).exec();
-    if (!result) {
-      throw new NotFoundException(`Land with ID ${id} not found`);
-    }
-    return { message: `Land with ID ${id} has been deleted` };
   }
 
   // async getFilteredProperties(query: QueryPropertiesDto) {

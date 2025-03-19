@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { DealType } from '../enums/property.enum';
-import { ConstructionType } from '../enums/construction.enum';
+import { DealType } from '../enum/property.enum';
+import { ConstructionType } from '../enum/construction.enum';
 import { Construction } from './construction.schema';
 import { Counter } from './counter.schema';
 

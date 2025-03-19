@@ -9,7 +9,7 @@ import {
   Min,
 } from 'class-validator';
 import { CreatePropertyDto } from './create-property.dto';
-import { ConstructionType } from '../enums/construction.enum';
+import { ConstructionType } from '../enum/construction.enum';
 
 export class CreateConstructionDto extends CreatePropertyDto {
   @IsNumber()

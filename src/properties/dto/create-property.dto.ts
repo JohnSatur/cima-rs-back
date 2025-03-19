@@ -16,7 +16,7 @@ import {
 import { AddressDto } from './address.dto';
 import { Type } from 'class-transformer';
 import { LocationDto } from './location.dto';
-import { DealType } from '../enums/property.enum';
+import { DealType } from '../enum/property.enum';
 
 export class CreatePropertyDto {
   @IsDefined()
@@ -77,4 +77,14 @@ export class CreatePropertyDto {
   @IsOptional()
   @Type(() => Boolean)
   featured: boolean;
+
+  @IsString()
+  @IsOptional()
+  @Type(() => String)
+  coverImage?: string;
+
+  @IsArray()
+  @IsOptional()
+  @Type(() => String)
+  images?: string[];
 }

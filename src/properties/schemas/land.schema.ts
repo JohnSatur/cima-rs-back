@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Property } from './property.schema';
-import { LandType, LandUse, Topography } from '../enums/land.enum';
+import { LandType, LandUse, Topography } from '../enum/land.enum';
 
 @Schema()
 export class Land extends Property {

@@ -15,6 +15,7 @@ import { CreateLandDto } from './dto/create-land.dto';
 import { Land } from './schemas/land.schema';
 import { UpdateConstructionDto } from './dto/update-construction.dto';
 import { UpdateLandDto } from './dto/update-land.dto';
+import { GetAllPropertiesQueryDto } from './dto/get-all-properties-query.dto';
 
 @Controller('properties')
 export class PropertiesController {
@@ -34,11 +35,9 @@ export class PropertiesController {
   // }
 
   @Get()
-  async getAllProperties(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 8,
-  ) {
-    return this.propertiesService.getAllProperties(page, limit);
+  async getAllProperties(@Query() query: GetAllPropertiesQueryDto) {
+    const { page = 1, limit = 8, type } = query;
+    return this.propertiesService.getAllProperties(page, limit, type);
   }
 
   @Get('/featured')
@@ -51,14 +50,9 @@ export class PropertiesController {
     return this.propertiesService.getPropertyById(id);
   }
 
-  @Get('/constructions')
-  async getAllConstructions() {
-    return this.propertiesService.getAllConstructions();
-  }
-
-  @Get('/constructions/:id')
-  async getConstructionById(@Param('id') id: string): Promise<Construction> {
-    return this.propertiesService.getConstructionById(id);
+  @Delete(':id')
+  async deleteProperty(@Param('id') id: string): Promise<{ message: string }> {
+    return this.propertiesService.deleteProperty(id);
   }
 
   @Post('/constructions')
@@ -76,23 +70,6 @@ export class PropertiesController {
     return this.propertiesService.updateConstruction(id, updateConstructionDto);
   }
 
-  @Delete('/constructions/:id')
-  async deleteConstruction(
-    @Param('id') id: string,
-  ): Promise<{ message: string }> {
-    return this.propertiesService.deleteConstruction(id);
-  }
-
-  @Get('/lands')
-  async getAllLands(): Promise<Land[]> {
-    return this.propertiesService.getAllLands();
-  }
-
-  @Get('/lands/:id')
-  async getLandById(@Param('id') id: string): Promise<Land> {
-    return this.propertiesService.getLandById(id);
-  }
-
   @Post('/lands')
   async createLand(@Body() createLandDto: CreateLandDto): Promise<Land> {
     return this.propertiesService.createLand(createLandDto);
@@ -104,10 +81,5 @@ export class PropertiesController {
     @Body() updateLandDto: UpdateLandDto,
   ): Promise<Land> {
     return this.propertiesService.updateLand(id, updateLandDto);
-  }
-
-  @Delete('/lands/:id')
-  async deleteLand(@Param('id') id: string): Promise<{ message: string }> {
-    return this.propertiesService.deleteLand(id);
   }
 }

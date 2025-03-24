@@ -16,23 +16,11 @@ import { Land } from './schemas/land.schema';
 import { UpdateConstructionDto } from './dto/update-construction.dto';
 import { UpdateLandDto } from './dto/update-land.dto';
 import { GetAllPropertiesQueryDto } from './dto/get-all-properties-query.dto';
+import { FilterPropertiesDto } from './dto/filter-properties.dto';
 
 @Controller('properties')
 export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService) {}
-
-  /* Promise<{
-    data: (Construction | Land)[];
-    total: number;
-    page: number;
-    totalPages: number;
-  }>*/
-  // @Get()
-  // async getFilteredProperties(
-  //   @Query() query: QueryPropertiesDto,
-  // ): Promise<any> {
-  //   return this.propertiesService.getFilteredProperties(query);
-  // }
 
   @Get()
   async getAllProperties(@Query() query: GetAllPropertiesQueryDto) {
@@ -40,9 +28,9 @@ export class PropertiesController {
     return this.propertiesService.getAllProperties(page, limit, type);
   }
 
-  @Get('/featured')
-  async getFeaturedProperties() {
-    return this.propertiesService.getFeaturedProperties();
+  @Get('filter')
+  async filterProperties(@Query() filters: FilterPropertiesDto) {
+    return this.propertiesService.filterProperties(filters);
   }
 
   @Get(':id')

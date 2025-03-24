@@ -12,6 +12,7 @@ import { CreateLandDto } from './dto/create-land.dto';
 import { UpdateConstructionDto } from './dto/update-construction.dto';
 import { Property } from './schemas/property.schema';
 import { UpdateLandDto } from './dto/update-land.dto';
+import { FilterPropertiesDto } from './dto/filter-properties.dto';
 
 @Injectable()
 export class PropertiesService {
@@ -119,27 +120,6 @@ export class PropertiesService {
     return { message: 'Propiedad eliminada con éxito' };
   }
 
-  async getFeaturedProperties() {
-    const properties = await this.propertyModel
-      .find({
-        featured: true,
-      })
-      .limit(3)
-      .lean()
-      .exec();
-
-    return properties.map((prop) => ({
-      type: (prop as any).propertyType, // Usa el discriminador
-      data: {
-        ...prop,
-        // Elimina campos internos de Mongoose
-        __v: undefined,
-        createdAt: undefined,
-        updatedAt: undefined,
-      },
-    }));
-  }
-
   async createConstruction(createConstructionDto: CreateConstructionDto) {
     const construction = new this.constructionModel(createConstructionDto);
     return construction.save();
@@ -185,35 +165,90 @@ export class PropertiesService {
     return updatedLand;
   }
 
-  // async getFilteredProperties(query: QueryPropertiesDto) {
-  //   const { page, limit, ...filters } = query;
-  //   const skip = (page - 1) * limit;
+  async filterProperties(filters: FilterPropertiesDto) {
+    const {
+      page = 1,
+      limit = 8,
+      dealType,
+      city,
+      minPrice,
+      maxPrice,
+      minArea,
+      maxArea,
+      featured,
+    } = filters;
 
-  //   // Queries de ambas construcciones
-  //   const constructionQuery = this.buildConstructionQuery(filters);
-  //   const landQuery = this.buildLandQuery(filters);
+    const skip = (page - 1) * limit;
+    const query: any = {};
 
-  //   const [constructions, lands] = await Promise.all([
-  //     this.constructionModel
-  //       .find(constructionQuery)
-  //       .skip(skip)
-  //       .limit(limit)
-  //       .exec(),
-  //     this.landModel.find(landQuery).skip(skip).limit(limit).exec(),
-  //   ]);
+    // Filtros básicos
+    if (dealType) query.dealType = dealType;
+    if (city) query['address.city'] = city;
 
-  //   const total = await Promise.all([
-  //     this.constructionModel.countDocuments(constructionQuery),
-  //     this.landModel.countDocuments(landQuery),
-  //   ]).then(([countConstruction, countLand]) => countConstruction + countLand);
+    // Filtros de precio
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = minPrice;
+      if (maxPrice) query.price.$lte = maxPrice;
+    }
 
-  //   return {
-  //     data: [...constructions, ...lands],
-  //     total,
-  //     page,
-  //     totalPages: Math.ceil(total / limit),
-  //   };
-  // }
+    if (featured) query.featured = featured;
+
+    // Filtros de área
+    if (minArea || maxArea) {
+      query.$or = [{ 'constructionDetails.totalArea': {} }, { landArea: {} }];
+
+      if (minArea) {
+        query.$or[0]['constructionDetails.totalArea'].$gte = minArea;
+        query.$or[1].landArea.$gte = minArea;
+      }
+
+      if (maxArea) {
+        query.$or[0]['constructionDetails.totalArea'].$lte = maxArea;
+        query.$or[1].landArea.$lte = maxArea;
+      }
+    }
+
+    const properties = await this.propertyModel
+      .find(query)
+      .skip(skip)
+      .limit(limit)
+      .lean()
+      .exec();
+
+    const total = await this.propertyModel.countDocuments(query);
+
+    const transformedProperties = properties.map((prop) => {
+      const sanitizedProperty = { ...prop };
+
+      delete sanitizedProperty.address.street;
+      delete sanitizedProperty.address.intNumber;
+      delete sanitizedProperty.address.extNumber;
+      delete sanitizedProperty.commissionPercentage;
+      delete sanitizedProperty.ownerName;
+      delete sanitizedProperty.notes;
+
+      return {
+        type: (sanitizedProperty as any).propertyType,
+        data: {
+          ...sanitizedProperty,
+          __v: undefined,
+          createdAt: undefined,
+          updatedAt: undefined,
+        },
+      };
+    });
+
+    return {
+      properties: transformedProperties,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
 
   private buildConstructionQuery(filters: any) {
     const query: any = {};

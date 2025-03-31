@@ -15,7 +15,6 @@ import { CreateLandDto } from './dto/create-land.dto';
 import { Land } from './schemas/land.schema';
 import { UpdateConstructionDto } from './dto/update-construction.dto';
 import { UpdateLandDto } from './dto/update-land.dto';
-import { GetAllPropertiesQueryDto } from './dto/get-all-properties-query.dto';
 import { FilterPropertiesDto } from './dto/filter-properties.dto';
 
 @Controller('properties')
@@ -23,9 +22,40 @@ export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService) {}
 
   @Get()
-  async getAllProperties(@Query() query: GetAllPropertiesQueryDto) {
-    const { page = 1, limit = 8, type } = query;
-    return this.propertiesService.getAllProperties(page, limit, type);
+  async getAllProperties(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('type') type?: string,
+    @Query('city') city?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('minLandArea') minLandArea?: string,
+    @Query('maxLandArea') maxLandArea?: string,
+    @Query('minConstructionArea') minConstructionArea?: string,
+    @Query('maxConstructionArea') maxConstructionArea?: string,
+    @Query('dealType') dealType?: string,
+  ) {
+    const filters = {
+      type,
+      city,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      minLandArea: minLandArea ? Number(minLandArea) : undefined,
+      maxLandArea: maxLandArea ? Number(maxLandArea) : undefined,
+      minConstructionArea: minConstructionArea
+        ? Number(minConstructionArea)
+        : undefined,
+      maxConstructionArea: maxConstructionArea
+        ? Number(maxConstructionArea)
+        : undefined,
+      dealType,
+    };
+
+    return this.propertiesService.getAllProperties(
+      page ? Number(page) : 1,
+      limit ? Number(limit) : 8,
+      filters,
+    );
   }
 
   @Get('filter')

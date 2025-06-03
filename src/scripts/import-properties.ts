@@ -1,3 +1,5 @@
+// npx ts-node src/scripts/import-properties.ts
+
 import { MongoClient } from 'mongodb';
 import * as XLSX from 'xlsx';
 import { DealType } from '../properties/enum/property.enum';
@@ -73,7 +75,8 @@ interface ExcelRow {
   ownerName?: string;
   featured?: string | boolean;
   coverImage?: string;
-  images?: string;
+  images?: string | string[];
+  code?: string;
   // Campos de Construction
   rooms?: string | number;
   bathrooms?: string | number;
@@ -99,42 +102,42 @@ function toNumber(value: string | number | undefined): number | undefined {
   return isNaN(num) ? undefined : num;
 }
 
-async function generatePropertyCode(
-  db: any,
-  property: PropertyData,
-): Promise<string> {
-  // 1. Determinar primera letra (V/R)
-  const dealCode = property.dealType === DealType.VENTA ? 'V' : 'R';
+// async function generatePropertyCode(
+//   db: any,
+//   property: PropertyData,
+// ): Promise<string> {
+//   // 1. Determinar primera letra (V/R)
+//   const dealCode = property.dealType === DealType.VENTA ? 'V' : 'R';
 
-  // 2. Determinar segunda parte del código
-  let typeCode: string;
-  if (property.propertyType === 'Land') {
-    typeCode = 'T';
-  } else {
-    const typeMap: Record<ConstructionType, string> = {
-      [ConstructionType.CASA]: 'C',
-      [ConstructionType.DEPARTAMENTO]: 'D',
-      [ConstructionType.LOFT]: 'L',
-      [ConstructionType.LOCAL_COMERCIAL]: 'LC',
-      [ConstructionType.EDIFICIO]: 'E',
-      [ConstructionType.OFICINA]: 'O',
-    };
-    typeCode = typeMap[property.constructionType as ConstructionType];
-  }
+//   // 2. Determinar segunda parte del código
+//   let typeCode: string;
+//   if (property.propertyType === 'Land') {
+//     typeCode = 'T';
+//   } else {
+//     const typeMap: Record<ConstructionType, string> = {
+//       [ConstructionType.CASA]: 'C',
+//       [ConstructionType.DEPARTAMENTO]: 'D',
+//       [ConstructionType.LOFT]: 'L',
+//       [ConstructionType.LOCAL_COMERCIAL]: 'LC',
+//       [ConstructionType.EDIFICIO]: 'E',
+//       [ConstructionType.OFICINA]: 'O',
+//     };
+//     typeCode = typeMap[property.constructionType as ConstructionType];
+//   }
 
-  // 3. Obtener secuencia incremental
-  const prefix = `${dealCode}${typeCode}`;
-  const counter = await db
-    .collection('counters')
-    .findOneAndUpdate(
-      { prefix },
-      { $inc: { seq: 1 } },
-      { returnDocument: 'after', upsert: true },
-    );
+//   // 3. Obtener secuencia incremental
+//   const prefix = `${dealCode}${typeCode}`;
+//   const counter = await db
+//     .collection('counters')
+//     .findOneAndUpdate(
+//       { prefix },
+//       { $inc: { seq: 1 } },
+//       { returnDocument: 'after', upsert: true },
+//     );
 
-  // 4. Formatear código final
-  return `${prefix}${counter.seq.toString().padStart(3, '0')}`;
-}
+//   // 4. Formatear código final
+//   return `${prefix}${counter.seq.toString().padStart(3, '0')}`;
+// }
 
 async function importProperties(excelPath: string, mongoUri: string) {
   const client = new MongoClient(mongoUri);
@@ -190,13 +193,28 @@ async function importProperties(excelPath: string, mongoUri: string) {
         notes: row.notes,
         commissionPercentage: toNumber(row.commissionPercentage),
         ownerName: row.ownerName,
-        featured: Boolean(row.featured),
+        featured: row.featured === 'true',
         coverImage:
           row.coverImage ||
-          'https://cimabienesraicesyconstruccion.com/wp-content/uploads/2022/09/CIMA.png',
-        images: row.images
-          ? row.images.split(',').map((s: string) => s.trim())
-          : [],
+          'https://res.cloudinary.com/dzlued6qi/image/upload/v1743526095/no-images_ehmumx.jpg',
+        images: (() => {
+          if (Array.isArray(row.images)) {
+            return row.images;
+          }
+          if (typeof row.images === 'string') {
+            try {
+              // Intentar parsear como JSON primero
+              const parsed = JSON.parse(row.images);
+              if (Array.isArray(parsed)) {
+                return parsed;
+              }
+            } catch {
+              // Si falla el parsing de JSON, tratar como string separado por comas
+              return row.images.split(',').map((s: string) => s.trim());
+            }
+          }
+          return [];
+        })(),
       };
 
       // Agregar campos específicos según el tipo de propiedad
@@ -232,7 +250,7 @@ async function importProperties(excelPath: string, mongoUri: string) {
       }
 
       // Generar código único para la propiedad
-      property.code = await generatePropertyCode(db, property);
+      property.code = row.code;
       properties.push(property);
     }
 

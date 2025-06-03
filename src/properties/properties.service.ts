@@ -26,8 +26,9 @@ export class PropertiesService {
   async getAllProperties(
     page: number = 1,
     limit: number = 8,
-    filters?: {
+    filters: {
       type?: string;
+      propertyType?: string;
       city?: string;
       minPrice?: number;
       maxPrice?: number;
@@ -36,84 +37,58 @@ export class PropertiesService {
       minConstructionArea?: number;
       maxConstructionArea?: number;
       dealType?: string;
-    },
+    } = {},
   ) {
-    const skip = (page - 1) * limit;
-
-    if (page < 1) throw new BadRequestException('La página debe ser mayor a 0');
-    if (limit < 1)
-      throw new BadRequestException('El límite debe ser mayor a 0');
-
     const query: any = {};
 
-    // Aplicar filtros si existen
-    if (filters) {
-      if (filters.type) query.propertyType = filters.type;
-      if (filters.city) query['address.city'] = filters.city;
-      if (filters.dealType) query.dealType = filters.dealType;
-
-      // Filtros de precio
-      if (filters.minPrice || filters.maxPrice) {
-        query.price = {};
-        if (filters.minPrice) query.price.$gte = filters.minPrice;
-        if (filters.maxPrice) query.price.$lte = filters.maxPrice;
-      }
-
-      // Filtros de área de terreno
-      if (filters.minLandArea || filters.maxLandArea) {
-        query.landArea = {};
-        if (filters.minLandArea) query.landArea.$gte = filters.minLandArea;
-        if (filters.maxLandArea) query.landArea.$lte = filters.maxLandArea;
-      }
-
-      // Filtros de área de construcción
-      if (filters.minConstructionArea || filters.maxConstructionArea) {
-        query.builtArea = {};
-        if (filters.minConstructionArea)
-          query.builtArea.$gte = filters.minConstructionArea;
-        if (filters.maxConstructionArea)
-          query.builtArea.$lte = filters.maxConstructionArea;
-      }
+    // Aplicar filtros
+    if (filters.type) {
+      query.type = filters.type;
     }
 
-    const properties = await this.propertyModel
-      .find(query)
-      .skip(skip)
-      .limit(limit)
-      .lean()
-      .exec();
+    if (filters.propertyType) {
+      query.propertyType = filters.propertyType;
+    }
 
-    const total = await this.propertyModel.countDocuments(query);
+    if (filters.city) {
+      query['address.city'] = filters.city;
+    }
 
-    const transformedProperties = properties.map((prop) => {
-      const sanitizedProperty = { ...prop };
+    if (filters.minPrice || filters.maxPrice) {
+      query.price = {};
+      if (filters.minPrice) query.price.$gte = filters.minPrice;
+      if (filters.maxPrice) query.price.$lte = filters.maxPrice;
+    }
 
-      delete sanitizedProperty.address.street;
-      delete sanitizedProperty.address.intNumber;
-      delete sanitizedProperty.address.extNumber;
-      delete sanitizedProperty.commissionPercentage;
-      delete sanitizedProperty.ownerName;
-      delete sanitizedProperty.notes;
+    if (filters.minLandArea || filters.maxLandArea) {
+      query.landArea = {};
+      if (filters.minLandArea) query.landArea.$gte = filters.minLandArea;
+      if (filters.maxLandArea) query.landArea.$lte = filters.maxLandArea;
+    }
 
-      return {
-        type: (sanitizedProperty as any).propertyType,
-        data: {
-          ...sanitizedProperty,
-          __v: undefined,
-          createdAt: undefined,
-          updatedAt: undefined,
-        },
-      };
-    });
+    if (filters.minConstructionArea || filters.maxConstructionArea) {
+      query.builtArea = {};
+      if (filters.minConstructionArea)
+        query.builtArea.$gte = filters.minConstructionArea;
+      if (filters.maxConstructionArea)
+        query.builtArea.$lte = filters.maxConstructionArea;
+    }
+
+    if (filters.dealType) {
+      query.dealType = filters.dealType;
+    }
+
+    const skip = (page - 1) * limit;
+    const [properties, total] = await Promise.all([
+      this.propertyModel.find(query).skip(skip).limit(limit).exec(),
+      this.propertyModel.countDocuments(query),
+    ]);
 
     return {
-      properties: transformedProperties,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      properties,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
     };
   }
 
@@ -311,5 +286,32 @@ export class PropertiesService {
       if (filters.maxArea) query.landArea.$lte = filters.maxArea;
     }
     return query;
+  }
+
+  async getAllPropertiesForStatic(filters: {
+    propertyType?: string;
+    city?: string;
+    dealType?: string;
+  }) {
+    const query: any = {};
+
+    if (filters.propertyType) {
+      query.propertyType = filters.propertyType;
+    }
+
+    if (filters.city) {
+      query['address.city'] = filters.city;
+    }
+
+    if (filters.dealType) {
+      query.dealType = filters.dealType;
+    }
+
+    const constructions = await this.constructionModel.find(query).exec();
+    const lands = await this.landModel.find(query).exec();
+
+    return {
+      properties: [...constructions, ...lands],
+    };
   }
 }

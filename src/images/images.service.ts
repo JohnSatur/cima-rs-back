@@ -38,14 +38,12 @@ export class ImagesService {
     try {
       const result = await this.cloudinary.api.resources({
         type: 'upload',
+        prefix: `${propertyCode}`,
         max_results: 50,
+        resource_type: 'image',
       });
 
-      return result.resources
-        .filter(
-          (resource) => resource.asset_folder === `cima-rs/${propertyCode}`,
-        )
-        .map((resource) => resource.url);
+      return result.resources.map((resource) => resource.secure_url);
     } catch (error) {
       throw new HttpException(
         `Imagenes de propiedad no encontradas: ${error.message}`,

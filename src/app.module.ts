@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
 import { ImagesModule } from './images/images.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ImagesModule } from './images/images.module';
     PropertiesModule,
     CommonModule,
     ImagesModule,
+    MailModule,
   ],
   controllers: [],
   providers: [],

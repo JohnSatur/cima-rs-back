@@ -21,11 +21,35 @@ import { FilterPropertiesDto } from './dto/filter-properties.dto';
 export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService) {}
 
+  @Get('all')
+  async getAllPropertiesForStatic(
+    @Query('propertyType') propertyType?: string,
+    @Query('city') city?: string,
+    @Query('dealType') dealType?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('minArea') minArea?: string,
+    @Query('maxArea') maxArea?: string,
+  ) {
+    const filters = {
+      propertyType,
+      city,
+      dealType,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      minArea: minArea ? Number(minArea) : undefined,
+      maxArea: maxArea ? Number(maxArea) : undefined,
+    };
+
+    return this.propertiesService.getAllPropertiesForStatic(filters);
+  }
+
   @Get()
   async getAllProperties(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('type') type?: string,
+    @Query('propertyType') propertyType?: string,
     @Query('city') city?: string,
     @Query('minPrice') minPrice?: string,
     @Query('maxPrice') maxPrice?: string,
@@ -37,6 +61,7 @@ export class PropertiesController {
   ) {
     const filters = {
       type,
+      propertyType,
       city,
       minPrice: minPrice ? Number(minPrice) : undefined,
       maxPrice: maxPrice ? Number(maxPrice) : undefined,
